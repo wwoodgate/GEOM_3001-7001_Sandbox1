@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEOm3001/7001 — Formative Quizzes</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F4F2ED;
+    --surface: #FFFFFF;
+    --surface2: #EDEAE3;
+    --text-primary: #1A1A18;
+    --text-secondary: #5C5B55;
+    --text-muted: #9B9A93;
+    --border: #D6D3CA;
+    --border-strong: #B8B5AC;
+    --accent: #1D7A5C;
+    --accent-light: #E0F2EA;
+    --accent-text: #0D5C42;
+    --amber: #B07D1A;
+    --amber-light: #FEF3DC;
+    --amber-text: #7A5510;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --radius: 12px;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1rem 5rem;
+  }
+
+  .site-header {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+  }
+  .wordmark {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .course-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent-text);
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+
+  .hero {
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 2.5rem;
+  }
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+  }
+  .hero p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  .section-label {
+    width: 100%;
+    max-width: 680px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quiz-list {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 2.5rem;
+  }
+
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+  }
+  .quiz-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .quiz-card.coming-soon {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .quiz-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent-text);
+    background: var(--accent-light);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .quiz-num.soon {
+    color: var(--text-muted);
+    background: var(--surface2);
+  }
+
+  .quiz-info { flex: 1; min-width: 0; }
+  .quiz-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+  }
+  .quiz-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .quiz-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 100px;
+    flex-shrink: 0;
+  }
+  .quiz-badge.live {
+    background: var(--accent-light);
+    color: var(--accent-text);
+  }
+  .quiz-badge.soon {
+    background: var(--surface2);
+    color: var(--text-muted);
+  }
+
+  .quiz-arrow {
+    font-size: 16px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: transform 0.15s, color 0.15s;
+  }
+  .quiz-card:hover .quiz-arrow {
+    transform: translateX(3px);
+    color: var(--accent);
+  }
+
+  .info-card {
+    width: 100%;
+    max-width: 680px;
+    background: var(--amber-light);
+    border: 1px solid #E8C96A;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 2.5rem;
+  }
+  .info-card p {
+    font-size: 13px;
+    color: var(--amber-text);
+    line-height: 1.65;
+  }
+  .info-card strong { font-weight: 600; }
+
+  .footer {
+    width: 100%;
+    max-width: 680px;
+    margin-top: auto;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer p {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 560px) {
+    .hero h1 { font-size: 22px; }
+    .quiz-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="wordmark">Digital Earth Australia</span>
+  <span class="course-tag">GEOm3001 / 7001</span>
+</header>
+
+<section class="hero">
+  <h1>Advanced Earth Observation Sciences<br>Formative quizzes</h1>
+  <p>Short practice quizzes aligned to each practical. Each question includes detailed feedback — wrong answers let you try again before the correct answer is revealed.</p>
+</section>
+
+<div class="info-card">
+  <p><strong>How these quizzes work:</strong> Select an answer for each question. If you choose incorrectly, you'll receive an explanation and can try again. Your score reflects how many questions you answered correctly on the first attempt. These are ungraded — they're here to help you consolidate what you've covered in each practical.</p>
+</div>
+
+<div class="section-label">Practicals</div>
+
+<div class="quiz-list">
+
+  <a class="quiz-card" href="practical1.html">
+    <div class="quiz-num">P1</div>
+    <div class="quiz-info">
+      <div class="quiz-title">DEA Sandbox — Beginner's Guide</div>
+      <div class="quiz-meta">12 questions &nbsp;·&nbsp; Notebooks 1–8 &nbsp;·&nbsp; Jupyter, DEA concepts, loading data, xarray</div>
+    </div>
+    <span class="quiz-badge live">Live</span>
+    <span class="quiz-arrow">→</span>
+  </a>
+
+  <div class="quiz-card coming-soon">
+    <div class="quiz-num soon">P2</div>
+    <div class="quiz-info">
+      <div class="quiz-title">Practical 2 quiz</div>
+      <div class="quiz-meta">Coming soon</div>
+    </div>
+    <span class="quiz-badge soon">Soon</span>
+  </div>
+
+  <div class="quiz-card coming-soon">
+    <div class="quiz-num soon">P3</div>
+    <div class="quiz-info">
+      <div class="quiz-title">Practical 3 quiz</div>
+      <div class="quiz-meta">Coming soon</div>
+    </div>
+    <span class="quiz-badge soon">Soon</span>
+  </div>
+
+  <div class="quiz-card coming-soon">
+    <div class="quiz-num soon">P4</div>
+    <div class="quiz-info">
+      <div class="quiz-title">Practical 4 quiz</div>
+      <div class="quiz-meta">Coming soon</div>
+    </div>
+    <span class="quiz-badge soon">Soon</span>
+  </div>
+
+  <div class="quiz-card coming-soon">
+    <div class="quiz-num soon">P5</div>
+    <div class="quiz-info">
+      <div class="quiz-title">Practical 5 quiz</div>
+      <div class="quiz-meta">Coming soon</div>
+    </div>
+    <span class="quiz-badge soon">Soon</span>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <p>UQ School of Earth and Environmental Sciences</p>
+  <p>Advanced Earth Observation Sciences</p>
+</footer>
+
+</body>
+</html>

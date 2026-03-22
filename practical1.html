@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEA Sandbox Quiz — GEOm3001/7001</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F4F2ED;
+    --surface: #FFFFFF;
+    --surface2: #EDEAE3;
+    --text-primary: #1A1A18;
+    --text-secondary: #5C5B55;
+    --text-muted: #9B9A93;
+    --border: #D6D3CA;
+    --border-strong: #B8B5AC;
+    --accent: #1D7A5C;
+    --accent-light: #E0F2EA;
+    --accent-text: #0D5C42;
+    --danger: #C0392B;
+    --danger-light: #FDECEA;
+    --danger-text: #8B2118;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  html { font-size: 16px; scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* ── Header bar ── */
+  .site-header {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+  }
+  .site-header .wordmark {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .site-header .course-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent-text);
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 720px;
+    padding: 2rem 2.25rem;
+  }
+
+  /* ── Progress ── */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.75rem;
+  }
+  .progress-track {
+    flex: 1;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* ── Question area ── */
+  .notebook-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent-text);
+    background: var(--accent-light);
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+  }
+
+  .q-text {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.55;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+  }
+
+  .q-code {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    background: #F8F7F4;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 1.25rem;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--text-primary);
+  }
+
+  /* ── Options ── */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .opt-btn {
+    display: block;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 16px;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-primary);
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    position: relative;
+  }
+  .opt-btn:hover:not(:disabled):not(.correct):not(.wrong):not(.dimmed) {
+    background: var(--surface2);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+  .opt-btn:active:not(:disabled) { transform: translateY(0); }
+
+  .opt-btn.correct {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent-text);
+    cursor: default;
+  }
+  .opt-btn.wrong {
+    background: var(--danger-light);
+    border-color: var(--danger);
+    color: var(--danger-text);
+  }
+  .opt-btn.dimmed {
+    opacity: 0.38;
+    cursor: default;
+  }
+  .opt-btn .opt-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    margin-right: 10px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .opt-btn.correct .opt-indicator {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .opt-btn.correct .opt-indicator::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 9px;
+    border: 2px solid white;
+    border-top: none;
+    border-left: none;
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    transform: rotate(45deg);
+  }
+  .opt-btn.wrong .opt-indicator {
+    background: var(--danger);
+    border-color: var(--danger);
+  }
+  .opt-btn.wrong .opt-indicator::before,
+  .opt-btn.wrong .opt-indicator::after {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 2px;
+    background: white;
+    position: absolute;
+    top: 7px;
+    left: 3px;
+  }
+  .opt-btn.wrong .opt-indicator::before { transform: rotate(45deg); }
+  .opt-btn.wrong .opt-indicator::after { transform: rotate(-45deg); }
+
+  /* ── Feedback ── */
+  .feedback {
+    margin-top: 14px;
+    padding: 13px 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    line-height: 1.6;
+    animation: fadeUp 0.25s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .feedback.correct {
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    color: var(--accent-text);
+  }
+  .feedback.wrong {
+    background: var(--danger-light);
+    border: 1px solid var(--danger);
+    color: var(--danger-text);
+  }
+  .feedback strong { font-weight: 600; }
+
+  /* ── Nav ── */
+  .nav-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+  }
+  .next-btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 22px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+  .next-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .next-btn:active { transform: translateY(0); }
+
+  /* ── Results ── */
+  .results-wrap { text-align: center; }
+  .score-ring {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring-track { fill: none; stroke: var(--surface2); stroke-width: 6; }
+  .score-ring-fill { fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1); }
+  .score-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-ring-wrap { position: relative; width: 100px; height: 100px; margin: 0 auto 1.5rem; }
+  .score-big { font-size: 26px; font-weight: 600; color: var(--accent-text); font-family: var(--mono); }
+  .score-pct { font-size: 12px; color: var(--accent); font-family: var(--mono); }
+  .results-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .results-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6; }
+
+  .review-grid { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 2rem; }
+  .review-item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .review-item .rv-q { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 5px; line-height: 1.45; }
+  .review-item .rv-status { font-family: var(--mono); font-size: 11px; font-weight: 500; margin-bottom: 4px; }
+  .review-item .rv-status.ok { color: var(--accent); }
+  .review-item .rv-status.miss { color: var(--danger); }
+  .review-item .rv-answer { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+  .restart-btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 11px 28px;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .restart-btn:hover { background: var(--surface2); border-color: var(--text-muted); }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 2rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .card { padding: 1.5rem 1.25rem; }
+    .q-text { font-size: 15px; }
+    .q-code { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="wordmark">Digital Earth Australia</span>
+  <span class="course-tag">GEOm3001 / 7001</span>
+</header>
+
+<div class="card" id="quiz-card">
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <span class="progress-label" id="prog-label">0 / 12</span>
+  </div>
+  <div id="q-area"></div>
+</div>
+
+<div class="footer">Advanced Earth Observation Sciences &nbsp;·&nbsp; UQ School of Earth and Environmental Sciences</div>
+
+<script>
+const questions = [
+  {
+    notebook: "01 – Jupyter notebooks",
+    text: "You run a cell in the DEA Sandbox and the symbol to its left changes to [*]:. What does this tell you?",
+    code: null,
+    options: [
+      { text: "The cell has finished running successfully.", correct: false, explanation: "Not quite. A finished cell shows a number in brackets, e.g. [1]:, indicating the order it was executed." },
+      { text: "The cell is currently running and waiting to complete.", correct: true, explanation: "Correct! The [*]: symbol means the kernel is busy executing that cell. It will change to a number, e.g. [1]:, once finished." },
+      { text: "The cell has not been run yet.", correct: false, explanation: "Not quite. An empty [ ]: indicates a cell that hasn't been run. [*]: specifically means the kernel is actively executing it right now." },
+      { text: "The cell encountered an error and stopped.", correct: false, explanation: "Errors produce a red traceback output below the cell — the bracket symbol itself doesn't change to signal an error. [*]: always means the cell is running." }
+    ]
+  },
+  {
+    notebook: "01 – Jupyter notebooks",
+    text: "While running a large data load in the Sandbox your cell has been executing for several minutes and appears frozen. What is the best first step?",
+    code: null,
+    options: [
+      { text: "Close the browser tab and reopen the Sandbox.", correct: false, explanation: "Closing the tab may lose your session state and any data already loaded. A less drastic approach is always worth trying first." },
+      { text: "Click the ■ 'Interrupt the kernel' button in the ribbon.", correct: true, explanation: "Correct! The interrupt (stop) button sends a signal to the kernel to stop the current execution without losing your notebook state. If it doesn't respond, the next step is Kernel → Restart Kernel." },
+      { text: "Delete the cell and rewrite the code.", correct: false, explanation: "Deleting the cell doesn't stop the running kernel process. The kernel will keep running until it's interrupted or finishes, regardless of whether the cell is deleted." },
+      { text: "Wait — there is no way to stop a running cell.", correct: false, explanation: "There is definitely a way! The ■ interrupt button in the toolbar stops execution. If that fails, Kernel → Restart Kernel will fully reset the notebook." }
+    ]
+  },
+  {
+    notebook: "02 – Introduction to DEA",
+    text: "A colleague loads Landsat 8 data using the measurement name nbart_red. Which best describes what the 'NBART' prefix tells you about this data?",
+    code: null,
+    options: [
+      { text: "The data has been processed to remove clouds and fill gaps with interpolated values.", correct: false, explanation: "Cloud removal is handled via Observation Attributes (OA) masking — it's a separate step. NBART itself doesn't fill cloud gaps." },
+      { text: "The data represents top-of-atmosphere radiance without any atmospheric correction.", correct: false, explanation: "This is the opposite — NBART is a bottom-of-atmosphere surface reflectance product. Top-of-atmosphere radiance is the raw uncorrected sensor measurement." },
+      { text: "The data has been atmospherically corrected and additionally corrected for terrain illumination effects.", correct: true, explanation: "Correct! NBART stands for Nadir-corrected BRDF Adjusted Reflectance with Terrain correction. It includes atmospheric correction plus an additional terrain illumination correction using a Digital Surface Model, making it the preferred choice for most analyses." },
+      { text: "The data is a derived index product such as NDVI, calculated from raw band values.", correct: false, explanation: "NBART measurements are individual spectral band reflectance values (e.g. red, NIR, SWIR), not derived indices. Band indices like NDVI are calculated from these values in a separate step." }
+    ]
+  },
+  {
+    notebook: "02 – Introduction to DEA",
+    text: "You want to analyse vegetation change in a hilly region of Queensland using Landsat data. Should you choose NBAR or NBART, and why?",
+    code: null,
+    options: [
+      { text: "NBAR, because it produces more visually attractive images without nodata gaps.", correct: false, explanation: "While NBAR can produce cleaner-looking visualisations, this aesthetic benefit doesn't support accurate change analysis in hilly terrain where topographic effects will bias your results." },
+      { text: "NBART, because the terrain illumination correction allows consistent comparison of surface reflectance across time and slope aspect.", correct: true, explanation: "Correct! NBART applies an additional terrain illumination correction so that slopes facing toward or away from the sun are more comparable. Without it, apparent reflectance differences could be caused by topography rather than real vegetation change." },
+      { text: "NBAR, because NBART is only designed for flat coastal environments.", correct: false, explanation: "This is the wrong way around. NBART is specifically designed to handle terrain effects. It can show nodata in extremely flat areas if DSM values are noisy, but it is the preferred choice for hilly terrain." },
+      { text: "Either — the two products are identical in all practical scenarios.", correct: false, explanation: "They are not identical. NBART includes an additional terrain illumination correction that NBAR does not. In hilly terrain this can make a significant difference to measured reflectance values." }
+    ]
+  },
+  {
+    notebook: "03 – Products & measurements",
+    text: "In the DEA Sandbox you want to list all available products in the datacube. Which Python call would you use?",
+    code: null,
+    options: [
+      { text: "dc.list_products()", correct: true, explanation: "Correct! dc.list_products() returns a DataFrame of all products indexed in the datacube, including their names, descriptions and available date ranges. This is the standard starting point for exploring what data is available." },
+      { text: "dc.load(product='all')", correct: false, explanation: "dc.load() is used to actually retrieve data for a specific product — you must supply a valid product name. Passing 'all' would raise an error." },
+      { text: "dc.search_products()", correct: false, explanation: "This is not a standard datacube method. The correct function is dc.list_products(), which returns all indexed products without requiring a search query." },
+      { text: "import datacube; print(datacube.products)", correct: false, explanation: "The datacube module doesn't expose products as a module-level attribute. You first need to connect with dc = datacube.Datacube(...) and then call dc.list_products()." }
+    ]
+  },
+  {
+    notebook: "04 – Loading data",
+    text: "What coordinate reference system do the x and y values assume by default in this dc.load() call?",
+    code: "dc.load(\n    product='ga_ls8cls9c_gm_cyear_3',\n    x=(153.3, 153.4),\n    y=(-27.5, -27.6),\n    time=('2015-01-01', '2015-12-31')\n)",
+    options: [
+      { text: "Australian Albers (EPSG:3577)", correct: false, explanation: "Australian Albers is the native storage CRS for many DEA products, but dc.load() does not assume this for query coordinates. You'd need to explicitly pass crs='EPSG:3577' if your x/y values are in that system." },
+      { text: "WGS84 geographic coordinates (EPSG:4326)", correct: true, explanation: "Correct! By default, dc.load() treats x and y query coordinates as longitude/latitude in WGS84 (EPSG:4326). The values 153.3/153.4 and -27.5/-27.6 are decimal degrees for a location near Moreton Bay, Queensland." },
+      { text: "UTM Zone 56S (EPSG:32756)", correct: false, explanation: "UTM coordinates would be in the hundreds of thousands of metres, not small decimal values like 153.3. To load with UTM coordinates you must explicitly pass crs='EPSG:32756' to dc.load()." },
+      { text: "No CRS is assumed — you must always specify one.", correct: false, explanation: "dc.load() does have a default: it assumes WGS84/EPSG:4326 if no crs parameter is provided. You only need to specify crs when your query coordinates are in a different system." }
+    ]
+  },
+  {
+    notebook: "04 – Loading data",
+    text: "You only need the red, green and blue bands from your loaded dataset. What argument would you add to dc.load() to avoid loading unnecessary data?",
+    code: "ds = dc.load(\n    product='ga_ls8cls9c_gm_cyear_3',\n    x=(153.3, 153.4),\n    y=(-27.5, -27.6),\n    time=('2015-01-01', '2015-12-31'),\n    # ← add argument here\n)",
+    options: [
+      { text: "bands=['nbart_red', 'nbart_green', 'nbart_blue']", correct: false, explanation: "Close! The correct keyword is measurements, not bands. Using bands would be ignored and all measurements would still load." },
+      { text: "measurements=['nbart_red', 'nbart_green', 'nbart_blue']", correct: true, explanation: "Correct! The measurements parameter accepts a list of measurement names. Specifying only the bands you need reduces memory usage and load time — especially important with large spatial or temporal extents." },
+      { text: "filter=['nbart_red', 'nbart_green', 'nbart_blue']", correct: false, explanation: "filter is not a dc.load() parameter. The correct argument is measurements. Using an unrecognised keyword argument will either raise a TypeError or be silently ignored." },
+      { text: "You cannot limit which bands are loaded — all measurements always load together.", correct: false, explanation: "You absolutely can! The measurements parameter lets you specify exactly which bands to load. This is a recommended practice to reduce memory usage and processing time." }
+    ]
+  },
+  {
+    notebook: "05 – Plotting",
+    text: "You have loaded an xarray.Dataset called ds with three time steps and want to quickly display all of them as RGB images side by side. Which approach is most appropriate?",
+    code: null,
+    options: [
+      { text: "ds.plot() — the default plot method automatically creates an RGB composite for each time step.", correct: false, explanation: "ds.plot() on a full Dataset isn't straightforward and won't automatically produce RGB composites. You would typically plot a single DataArray (a single band), which produces a grayscale heatmap." },
+      { text: "ds[['nbart_red','nbart_green','nbart_blue']].to_array().plot.imshow(col='time', robust=True)", correct: true, explanation: "Correct! Converting selected bands with to_array() then using .plot.imshow() with col='time' creates a faceted plot — one RGB image per time step. robust=True clips outliers for better contrast. This is the standard DEA pattern for multi-timestep RGB visualisation." },
+      { text: "matplotlib.pyplot.imshow(ds) — passing the Dataset directly to matplotlib.", correct: false, explanation: "matplotlib's imshow expects a NumPy array, not an xarray Dataset. You'd need to extract and stack the band arrays first. The xarray .plot.imshow() interface is much more convenient for DEA data." },
+      { text: "ds.plot.scatter(x='x', y='y', col='time')", correct: false, explanation: "scatter plots each pixel as a point in a scatter diagram — not as spatial imagery. For spatial image display you want .plot.imshow(), which renders pixels in their correct geographic arrangement." }
+    ]
+  },
+  {
+    notebook: "06 – Basic analysis",
+    text: "You want to calculate the mean surface reflectance of the NIR band across all time steps in your dataset ds. Which line of code correctly does this?",
+    code: null,
+    options: [
+      { text: "ds.nbart_nir.average()", correct: false, explanation: "xarray DataArrays don't have an .average() method. The correct method is .mean(). You should also specify the dimension — e.g. .mean(dim='time') — to collapse across time while keeping the spatial dimensions." },
+      { text: "ds.nbart_nir.mean(dim='time')", correct: true, explanation: "Correct! .mean(dim='time') calculates the mean across the time dimension, returning a 2D (y, x) DataArray — the average NIR reflectance at each pixel across all observations. This is one of the most common operations in DEA time series analysis." },
+      { text: "numpy.mean(ds.nbart_nir)", correct: false, explanation: "While this produces a result, it collapses all dimensions (time, y, x) into a single scalar — losing all spatial information. Using the xarray .mean(dim='time') method preserves the spatial (y, x) dimensions." },
+      { text: "ds['nbart_nir'].sum() / ds['nbart_nir'].count()", correct: false, explanation: "This gives a single global average across all dimensions, and doesn't handle nodata values (-999) correctly. The cleanest approach is .mean(dim='time'), which xarray computes efficiently and can handle masking." }
+    ]
+  },
+  {
+    notebook: "07 – Intro to NumPy",
+    text: "Your NIR DataArray contains nodata pixels with a value of -999. You want to mask these before calculating statistics. Which approach correctly creates a masked array in NumPy?",
+    code: null,
+    options: [
+      { text: "nir_values = ds.nbart_nir.values\nnir_masked = nir_values[nir_values != -999]", correct: false, explanation: "This boolean indexing flattens the array to 1D, removing spatial structure. For pixel-wise statistics that preserve (y, x) dimensions you need np.where() or a masked array that keeps the shape intact." },
+      { text: "nir_masked = numpy.ma.masked_where(\n    ds.nbart_nir.values == -999,\n    ds.nbart_nir.values\n)", correct: true, explanation: "Correct! numpy.ma.masked_where() creates a masked array that keeps the original shape (time, y, x) while flagging nodata pixels. Subsequent numpy operations (mean, std, etc.) automatically ignore masked values, giving correct statistics." },
+      { text: "nir_masked = ds.nbart_nir.fillna(-999)", correct: false, explanation: "fillna() replaces NaN with a value — here it would try to fill NaNs with -999, which is the opposite of what you want. To mask nodata, use .where(ds.nbart_nir != -999) in xarray, or numpy.ma.masked_where() in NumPy." },
+      { text: "NoData pixels don't need masking — numpy functions like mean() automatically skip -999 values.", correct: false, explanation: "NumPy has no built-in knowledge that -999 means nodata. It will treat it as a valid integer and include it in calculations, severely skewing your statistics. You must explicitly mask or filter these values." }
+    ]
+  },
+  {
+    notebook: "08 – Intro to Xarray",
+    text: "You have an xarray.Dataset ds with dimensions (time: 24, y: 500, x: 500). You want to select only data from January 2020. Which correctly does this?",
+    code: null,
+    options: [
+      { text: "ds.sel(time='2020-01')", correct: true, explanation: "Correct! xarray's .sel() (label-based selection) understands partial datetime strings. Passing '2020-01' selects all time steps within January 2020. This is one of xarray's most powerful features for time series work in DEA." },
+      { text: "ds[ds.time == '2020-01']", correct: false, explanation: "This doesn't work cleanly for datetime filtering. xarray datetime coordinates are stored as numpy datetime64 objects, so direct string equality comparisons won't select a whole month. Use .sel(time='2020-01') or .sel(time=slice('2020-01-01','2020-01-31')) instead." },
+      { text: "ds.isel(time=0)", correct: false, explanation: "isel() uses integer-based positional indexing — time=0 selects the first time step, not January 2020. Unless you know January 2020 is at position 0, this approach is fragile and not recommended." },
+      { text: "ds.filter(time='2020-01')", correct: false, explanation: "xarray Datasets don't have a .filter() method. The correct label-based selection method is .sel(). Use ds.sel(time='2020-01') for selecting by a partial datetime label." }
+    ]
+  },
+  {
+    notebook: "08 – Intro to Xarray",
+    text: "You load a Landsat dataset covering 10 years (120 time steps) and 1000 × 1000 pixels. When you try ds.nbart_nir.mean(dim='time') the kernel crashes. What is the most likely cause and best solution?",
+    code: null,
+    options: [
+      { text: "The xarray mean() function has a bug for large datasets — use numpy instead.", correct: false, explanation: "xarray's mean() is reliable and well-tested. The issue is almost certainly memory, not a bug. Switching to numpy would make things worse, as you'd first need to call .values to extract a large NumPy array." },
+      { text: "The dataset is too large to load entirely into RAM — use Dask to enable chunked, out-of-memory processing.", correct: true, explanation: "Correct! 120 × 1000 × 1000 int16 pixels ≈ 240 MB per band, and all bands together can easily exhaust RAM. Adding dask_chunks={'time':10,'x':500,'y':500} to dc.load() defers computation into manageable chunks, allowing .mean() to run without loading everything at once." },
+      { text: "The dataset has too many time steps — reduce the time range to fewer than 50 observations.", correct: false, explanation: "Arbitrarily limiting your time range defeats the purpose of long-term analysis. The correct solution is to use Dask chunking, which allows processing of arbitrarily large datasets by dividing them into manageable pieces." },
+      { text: "xarray cannot handle 3D datasets — you must loop over each time step manually.", correct: false, explanation: "xarray is specifically designed for multi-dimensional data. It handles 3D and higher-dimensional datasets natively. The crash is a memory issue, which Dask is designed to solve." }
+    ]
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = new Array(questions.length).fill(false);
+let firstAttempt = new Array(questions.length).fill(true);
+let wrongSelected = [];
+
+function updateProgress() {
+  const pct = (current / questions.length) * 100;
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = current + ' / ' + questions.length;
+}
+
+function render() {
+  updateProgress();
+  if (current >= questions.length) { showResults(); return; }
+
+  const q = questions[current];
+  const isAnswered = answered[current];
+  let html = '';
+
+  html += `<div class="notebook-tag">${q.notebook}</div>`;
+  html += `<div class="q-text">${q.text}</div>`;
+  if (q.code) html += `<div class="q-code">${escHtml(q.code)}</div>`;
+
+  html += '<div class="options">';
+  q.options.forEach((opt, i) => {
+    let cls = 'opt-btn';
+    let disabled = '';
+    if (isAnswered) {
+      if (opt.correct) cls += ' correct';
+      else if (wrongSelected.includes(i)) cls += ' wrong';
+      else { cls += ' dimmed'; disabled = 'disabled'; }
+    }
+    if (isAnswered && !opt.correct && !wrongSelected.includes(i)) disabled = 'disabled';
+    if (isAnswered && opt.correct) disabled = 'disabled';
+    html += `<button class="${cls}" ${disabled} onclick="choose(${i})">
+      <span class="opt-indicator"></span>${escHtml(opt.text)}
+    </button>`;
+  });
+  html += '</div>';
+
+  if (isAnswered) {
+    const correctOpt = q.options.find(o => o.correct);
+    html += `<div class="feedback correct"><strong>Correct!</strong> ${correctOpt.explanation}</div>`;
+  } else if (wrongSelected.length > 0) {
+    const last = wrongSelected[wrongSelected.length - 1];
+    html += `<div class="feedback wrong"><strong>Not quite.</strong> ${q.options[last].explanation}</div>`;
+  }
+
+  if (isAnswered) {
+    const label = current < questions.length - 1 ? 'Next question →' : 'See results →';
+    html += `<div class="nav-row"><button class="next-btn" onclick="next()">${label}</button></div>`;
+  }
+
+  document.getElementById('q-area').innerHTML = html;
+}
+
+function choose(i) {
+  if (answered[current]) return;
+  const q = questions[current];
+  if (q.options[i].correct) {
+    if (firstAttempt[current]) score++;
+    answered[current] = true;
+    render();
+  } else {
+    if (!wrongSelected.includes(i)) wrongSelected.push(i);
+    firstAttempt[current] = false;
+    render();
+  }
+}
+
+function next() {
+  current++;
+  wrongSelected = [];
+  render();
+}
+
+function showResults() {
+  const pct = Math.round(score / questions.length * 100);
+  const circ = 2 * Math.PI * 40;
+  const offset = circ - (pct / 100) * circ;
+  const msg = pct >= 80
+    ? 'Strong work — you have a solid grasp of the DEA Sandbox basics.'
+    : pct >= 60
+    ? 'Good effort! Review the notebooks for the questions you found tricky.'
+    : 'Keep going — revisiting the Beginner\'s Guide notebooks will help consolidate these skills.';
+
+  let reviewHtml = questions.map((q, idx) => {
+    const gotRight = firstAttempt[idx] && answered[idx];
+    const correctOpt = q.options.find(o => o.correct);
+    return `<div class="review-item">
+      <div class="rv-q">Q${idx+1}: ${q.text}</div>
+      <div class="rv-status ${gotRight ? 'ok' : 'miss'}">${gotRight ? '✓ Correct on first attempt' : '✗ Required multiple attempts'}</div>
+      <div class="rv-answer"><strong>Answer:</strong> ${correctOpt.text}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('q-area').innerHTML = `
+    <div class="results-wrap">
+      <div class="score-ring-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="score-ring-track" cx="50" cy="50" r="40"/>
+          <circle class="score-ring-fill" cx="50" cy="50" r="40"
+            stroke-dasharray="${circ}"
+            stroke-dashoffset="${offset}"
+            style="transform:rotate(-90deg);transform-origin:50% 50%;"/>
+        </svg>
+        <div class="score-overlay">
+          <span class="score-big">${score}/${questions.length}</span>
+          <span class="score-pct">${pct}%</span>
+        </div>
+      </div>
+      <h2 class="results-title">Quiz complete</h2>
+      <p class="results-sub">${msg}</p>
+      <div class="review-grid">${reviewHtml}</div>
+      <button class="restart-btn" onclick="restart()">Restart quiz</button>
+    </div>`;
+
+  document.getElementById('prog').style.width = '100%';
+  document.getElementById('prog-label').textContent = '12 / 12';
+}
+
+function restart() {
+  current = 0; score = 0;
+  answered = new Array(questions.length).fill(false);
+  firstAttempt = new Array(questions.length).fill(true);
+  wrongSelected = [];
+  render();
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+render();
+</script>
+</body>
+</html>
